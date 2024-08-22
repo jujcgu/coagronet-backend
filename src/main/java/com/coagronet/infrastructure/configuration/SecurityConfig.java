@@ -35,10 +35,12 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/items/**").permitAll()
                         .requestMatchers("/api/v1/tipo_sede/**").permitAll()
                         .requestMatchers("/api/v1/empresa/**").permitAll()
-                        .requestMatchers("/api/v1/roles/**").hasRole("CLIENTE")
-                        .requestMatchers("/api/v1/personas/**").hasRole("CLIENTE")
+                        .requestMatchers("/api/v1/grupo/**").permitAll()
+                        .requestMatchers("/api/v1/email/**").permitAll()
+                        .requestMatchers("/api/v1/roles/**").permitAll()
+                        .requestMatchers("/api/v1/personas/**").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**").permitAll()
-                        .requestMatchers("/api/v1/tipo_identificacion/**").hasRole("ADMINISTRADOR")
+                        .requestMatchers("/api/v1/tipo_identificacion/**").permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 

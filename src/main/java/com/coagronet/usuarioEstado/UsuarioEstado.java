@@ -21,8 +21,11 @@ public class UsuarioEstado {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "use_id")
-    private Integer id;
+    private Long id;
 
-    @Column(name = "use_descripcion")
-    private String descripcion;
+    @Column(name = "use_descripcion", nullable = false, unique = true)
+    private String nombre;
+
+    public static final UsuarioEstado ACTIVE = new UsuarioEstado(1L, "ACTIVE");
+    public static final UsuarioEstado PENDING_VERIFICATION = new UsuarioEstado(2L, "PENDING_VERIFICATION");
 }

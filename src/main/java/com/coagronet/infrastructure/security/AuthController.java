@@ -21,13 +21,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.coagronet.role.Role;
 import com.coagronet.role.repositories.RoleRepository;
 import com.coagronet.user.User;
-
-import jakarta.validation.Valid;
+import com.coagronet.user.services.UserRegistrationService;
 
 @RestController
 @RequestMapping("/auth")
@@ -48,8 +48,11 @@ public class AuthController {
     @Autowired
     private JwtService jwtService;
 
+    @Autowired
+    private UserRegistrationService userRegistrationService;
+
     @PostMapping("/register")
-    public ResponseEntity<?> register(@Valid @RequestBody User user) {
+    public ResponseEntity<?> register(@RequestBody User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         Role userRole = roleRepository.findByName(default_role);
@@ -58,7 +61,20 @@ public class AuthController {
         roles.add(userRole);
         user.setRoles(roles);
 
-        return ResponseEntity.ok(myUserDetailsService.saveUser(user));
+        userRegistrationService.registerUser(user);
+
+        return ResponseEntity
+                .ok("Verification email sent to " + user.getUsername() + myUserDetailsService.saveUser(user));
+    }
+
+    @PostMapping("/verify")
+    public ResponseEntity<String> verifyUser(@RequestParam String email, @RequestParam String code) {
+        boolean isVerified = userRegistrationService.activateUser(email, code);
+        if (isVerified) {
+            return ResponseEntity.ok("User activated successfully");
+        } else {
+            return ResponseEntity.status(400).body("Invalid verification code");
+        }
     }
 
     @PostMapping("/login")
