@@ -33,7 +33,7 @@ public class Persona {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "per_tipo_identificacion")
+    @JoinColumn(name = "per_tipo_identificacion", referencedColumnName = "tii_id")
     private TipoIdentificacion tipoIdentificacion;
 
     @Column(name = "per_identificacion")
@@ -65,5 +65,4 @@ public class Persona {
 
     @OneToMany(mappedBy = "persona")
     private List<User> users;
-
 }

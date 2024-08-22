@@ -8,3 +8,4 @@ import com.coagronet.persona.Persona;
 @Repository
 public interface PersonaRepository extends JpaRepository<Persona, Long> {
 }
+
