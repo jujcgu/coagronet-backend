@@ -1,56 +1,41 @@
 package com.coagronet.empresa.services;
 
 import java.util.List;
-import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.coagronet.empresa.Empresa;
 import com.coagronet.empresa.repositories.EmpresaRepository;
 
+import jakarta.persistence.EntityNotFoundException;
+
 @Service
 public class EmpresaService {
 
-    @Autowired
-    private EmpresaRepository empresaRepository;
+    private final EmpresaRepository empresaRepository;
 
-    // Create
-    public Empresa addEmpresa(Empresa empresa) {
-        return empresaRepository.save(empresa);
+    public EmpresaService(EmpresaRepository empresaRepository) {
+        this.empresaRepository = empresaRepository;
     }
 
-    // Read all
-    public List<Empresa> getAllEmpresas() {
+    public List<Empresa> findAll() {
         return empresaRepository.findAll();
     }
 
-    // Read by ID
-    public Empresa getEmpresaById(Integer id) {
-        Optional<Empresa> empresa = empresaRepository.findById(id);
-        return empresa.orElse(null);
+    public Empresa findById(Integer id) {
+        return empresaRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Empresa no encontrada"));
     }
 
-    // Update
-    public Empresa updateEmpresa(Integer id, Empresa empresaDetails) {
-        Empresa empresa = getEmpresaById(id);
-        if (empresa != null) {
-            empresa.setNombre(empresaDetails.getNombre());
-            empresa.setTipoIdentificacion(empresaDetails.getTipoIdentificacion());
-            empresa.setEstado(empresaDetails.getEstado());
-            empresa.setCelular(empresaDetails.getCelular());
-            empresa.setContacto(empresaDetails.getContacto());
-            empresa.setCorreo(empresaDetails.getCorreo());
-            empresa.setDescripcion(empresaDetails.getDescripcion());
-            empresa.setPersona(empresaDetails.getPersona());
-            return empresaRepository.save(empresa);
-        }
-        return null;
+    public Empresa save(Empresa empresa) {
+        return empresaRepository.save(empresa);
     }
 
-    // Delete
-    public void deleteEmpresa(Integer id) {
+    public Empresa update(Empresa empresa) {
+        return empresaRepository.save(empresa);
+    }
+
+    public void deleteById(Integer id) {
         empresaRepository.deleteById(id);
     }
-
 }

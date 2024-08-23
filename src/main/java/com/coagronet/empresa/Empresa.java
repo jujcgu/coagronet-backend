@@ -30,6 +30,9 @@ public class Empresa {
     @JoinColumn(name = "emp_tipo_identificacion_id", referencedColumnName = "tii_id", columnDefinition = "integer default 6")
     private TipoIdentificacion tipoIdentificacion;
 
+    @Column(name = "emp_identificacion")
+    private String identificacion;
+
     @Column(name = "emp_nombre")
     private String nombre;
 

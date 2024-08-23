@@ -34,7 +34,7 @@ public class SecurityConfig {
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/api/v1/items/**").permitAll()
                         .requestMatchers("/api/v1/tipo_sede/**").permitAll()
-                        .requestMatchers("/api/v1/empresa/**").permitAll()
+                        .requestMatchers("/api/v1/empresas/**").permitAll()
                         .requestMatchers("/api/v1/grupo/**").permitAll()
                         .requestMatchers("/api/v1/email/**").permitAll()
                         .requestMatchers("/api/v1/roles/**").permitAll()

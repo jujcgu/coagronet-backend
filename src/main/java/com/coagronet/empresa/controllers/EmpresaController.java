@@ -1,8 +1,8 @@
 package com.coagronet.empresa.controllers;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -16,92 +16,56 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.coagronet.empresa.Empresa;
+import com.coagronet.empresa.dtos.EmpresaDTO;
+import com.coagronet.empresa.mappers.EmpresaMapper;
 import com.coagronet.empresa.services.EmpresaService;
-import com.coagronet.infrastructure.configuration.ResponseHandler;
 
 @RestController
-@RequestMapping("/api/v1/empresa")
 @CrossOrigin(origins = "*")
+@RequestMapping("/api/v1/empresas")
 public class EmpresaController {
-    @Autowired
-    private EmpresaService empresaService;
 
-    @PostMapping("/add")
-    public ResponseEntity<Object> addEmpresa(@RequestBody Empresa empresa) {
-        try {
-            empresaService.addEmpresa(empresa);
-            return ResponseHandler.generateResponse(HttpStatus.OK,
-                    false,
-                    "Empresa creado exitosamente.",
-                    null);
-        } catch (Exception e) {
-            return ResponseHandler.generateResponse(
-                    HttpStatus.INTERNAL_SERVER_ERROR,
-                    true,
-                    "Error al crear la empresa.",
-                    null);
-        }
-    }
+    private final EmpresaService empresaService;
+    private final EmpresaMapper empresaMapper;
 
-    @GetMapping("/all")
-    public List<Empresa> getAllEmpresas() {
-        return empresaService.getAllEmpresas();
+    public EmpresaController(EmpresaService empresaService, EmpresaMapper empresaMapper) {
+        this.empresaService = empresaService;
+        this.empresaMapper = empresaMapper;
     }
 
     @GetMapping("/{id}")
-    public Empresa getEmpresaById(@PathVariable Integer id) {
-        return empresaService.getEmpresaById(id);
+    public ResponseEntity<EmpresaDTO> getEmpresaById(@PathVariable Integer id) {
+        Empresa empresa = empresaService.findById(id);
+        return ResponseEntity.ok(empresaMapper.toEmpresaDTO(empresa));
     }
 
-    @PutMapping("/update/{id}")
-    public ResponseEntity<Object> updateEmpresa(@PathVariable Integer id, @RequestBody Empresa empresaDetails) {
-        try {
-            Empresa existingEmpresa = empresaService.getEmpresaById(id);
-            if (existingEmpresa == null) {
-                return ResponseHandler.generateResponse(
-                        HttpStatus.NOT_FOUND,
-                        false,
-                        "Empresa no encontrada.",
-                        null);
-            }
-            empresaService.updateEmpresa(id, empresaDetails);
-            return ResponseHandler.generateResponse(
-                    HttpStatus.OK,
-                    false,
-                    "Empresa actualizada exitosamente.",
-                    null);
-        } catch (Exception e) {
-            return ResponseHandler.generateResponse(
-                    HttpStatus.INTERNAL_SERVER_ERROR,
-                    true,
-                    "Error al actualizar la empresa.",
-                    null);
-        }
+    @GetMapping
+    public ResponseEntity<List<EmpresaDTO>> getAllEmpresas() {
+        List<Empresa> empresas = empresaService.findAll();
+        List<EmpresaDTO> empresaDTOs = empresas.stream()
+                .map(empresaMapper::toEmpresaDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(empresaDTOs);
     }
 
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Object> deleleEmpresa(@PathVariable Integer id) {
-        try {
-            Empresa existingEmpresa = empresaService.getEmpresaById(id);
-            if (existingEmpresa == null) {
-                return ResponseHandler.generateResponse(
-                        HttpStatus.NOT_FOUND,
-                        false,
-                        "Empresa no encontrada.",
-                        null);
-            }
-            empresaService.deleteEmpresa(id);
-            return ResponseHandler.generateResponse(
-                    HttpStatus.OK,
-                    false,
-                    "Empresa borrada exitosamente.",
-                    null);
-        } catch (Exception e) {
-            return ResponseHandler.generateResponse(
-                    HttpStatus.INTERNAL_SERVER_ERROR,
-                    true,
-                    "Error al borrar la empresa.",
-                    null);
-        }
+    @PostMapping
+    public ResponseEntity<EmpresaDTO> createEmpresa(@RequestBody EmpresaDTO empresaDTO) {
+        Empresa empresa = empresaMapper.toEmpresa(empresaDTO);
+        Empresa createdEmpresa = empresaService.save(empresa);
+        return ResponseEntity.status(HttpStatus.CREATED).body(empresaMapper.toEmpresaDTO(createdEmpresa));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<EmpresaDTO> updateEmpresa(@PathVariable Integer id, @RequestBody EmpresaDTO empresaDTO) {
+        Empresa empresa = empresaMapper.toEmpresa(empresaDTO);
+        empresa.setId(id);
+        Empresa updatedEmpresa = empresaService.update(empresa);
+        return ResponseEntity.ok(empresaMapper.toEmpresaDTO(updatedEmpresa));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteEmpresa(@PathVariable Integer id) {
+        empresaService.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 }
