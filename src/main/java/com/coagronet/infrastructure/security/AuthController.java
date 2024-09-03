@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.coagronet.email.services.EmailVerificationService;
 import com.coagronet.role.Role;
 import com.coagronet.role.repositories.RoleRepository;
 import com.coagronet.user.User;
@@ -51,29 +52,35 @@ public class AuthController {
     @Autowired
     private UserRegistrationService userRegistrationService;
 
+    @Autowired
+    private EmailVerificationService emailVerificationService;
+
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody User user) {
+
+        // Crear y enviar el token de verificación
+        String token = emailVerificationService.createVerificationToken(user.getUsername());
+        emailVerificationService.sendVerificationEmail(user.getUsername(), token);
+
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         Role userRole = roleRepository.findByName(default_role);
-
         Set<Role> roles = new HashSet<>();
         roles.add(userRole);
         user.setRoles(roles);
 
         userRegistrationService.registerUser(user);
 
-        return ResponseEntity
-                .ok("Verification email sent to " + user.getUsername() + myUserDetailsService.saveUser(user));
+        return ResponseEntity.ok("Verification email sent to " + user.getUsername());
     }
 
-    @PostMapping("/verify")
-    public ResponseEntity<String> verifyUser(@RequestParam String email, @RequestParam String code) {
-        boolean isVerified = userRegistrationService.activateUser(email, code);
+    @GetMapping("/verify")
+    public ResponseEntity<String> verifyUser(@RequestParam String token) {
+        boolean isVerified = userRegistrationService.activateUser(token);
         if (isVerified) {
             return ResponseEntity.ok("User activated successfully");
         } else {
-            return ResponseEntity.status(400).body("Invalid verification code");
+            return ResponseEntity.status(400).body("Invalid verification link");
         }
     }
 

@@ -29,3 +29,4 @@ public class UsuarioEstado {
     public static final UsuarioEstado ACTIVE = new UsuarioEstado(1L, "ACTIVE");
     public static final UsuarioEstado PENDING_VERIFICATION = new UsuarioEstado(2L, "PENDING_VERIFICATION");
 }
+

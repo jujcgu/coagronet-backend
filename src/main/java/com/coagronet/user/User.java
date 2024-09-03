@@ -46,8 +46,6 @@ public class User implements UserDetails {
     @Column(name = "usu_email", unique = true, nullable = false)
     private String username;
 
-    // @Pattern(regexp =
-    // "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,20}$")
     @Column(name = "usu_password", nullable = false)
     private String password;
 
@@ -65,21 +63,16 @@ public class User implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        // Debugging: Print roles
-        System.out.println("Roles for user " + username + ": " + roles);
-
-        // return getRoles().stream()
-
-        System.out.println("roles " + roles.stream()
-                .map(role -> new SimpleGrantedAuthority(role.getName()))
-                .collect(Collectors.toSet()));
-
         return roles.stream()
                 .map(role -> new SimpleGrantedAuthority(role.getName()))
                 .collect(Collectors.toSet());
     }
 
-    // Other methods from UserDetails interface
+    public void setUsuarioEstado(UsuarioEstado usuarioEstado) {
+        this.usuarioEstado = usuarioEstado;
+    }
+
+    // Métodos de UserDetails
     @Override
     public boolean isAccountNonExpired() {
         return true;
@@ -97,7 +90,7 @@ public class User implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        // Retorna true solo si el estado del usuario es "ACTIVE"
+        return UsuarioEstado.ACTIVE.equals(this.usuarioEstado);
     }
-
 }

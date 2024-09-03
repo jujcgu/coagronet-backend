@@ -4,7 +4,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 // import org.hibernate.mapping.Set;
+import com.coagronet.usuarioEstado.UsuarioEstado;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -26,19 +28,15 @@ public class MyUserDetailsService implements UserDetailsService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        System.out.println("xxx " + user.getRoles());
+        // Verificar si el usuario no está activo
+        if (!UsuarioEstado.ACTIVE.equals(user.getUsuarioEstado())) {
+            throw new DisabledException("User account is not active.");
+        }
 
         Set<SimpleGrantedAuthority> authorities = user.getRoles().stream()
                 .map(Role::getName)
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toSet());
-
-        System.out.println(authorities);
-
-        System.out.println("zz " + new org.springframework.security.core.userdetails.User(
-                user.getUsername(),
-                user.getPassword(),
-                authorities));
 
         return new org.springframework.security.core.userdetails.User(
                 user.getUsername(),
@@ -50,3 +48,5 @@ public class MyUserDetailsService implements UserDetailsService {
         return userRepository.save(user);
     }
 }
+
+
