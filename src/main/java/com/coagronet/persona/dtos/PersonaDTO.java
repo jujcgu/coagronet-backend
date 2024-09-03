@@ -1,6 +1,8 @@
 package com.coagronet.persona.dtos;
 
-import java.util.Date;
+import java.time.LocalDate;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import lombok.Data;
 
@@ -11,8 +13,9 @@ public class PersonaDTO {
     private String identificacion;
     private String apellido;
     private String nombre;
-    private Boolean genero;
-    private Date fechaNacimiento;
+    private String genero;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate fechaNacimiento;
     private Integer estrato;
     private String direccion;
     private String celular;

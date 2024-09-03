@@ -66,4 +66,5 @@ public class PersonaController {
         personaService.deletePersona(id);
         return ResponseEntity.noContent().build();
     }
+
 }

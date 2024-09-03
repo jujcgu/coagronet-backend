@@ -1,6 +1,6 @@
 package com.coagronet.persona;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 import com.coagronet.tipoIdentificacion.TipoIdentificacion;
@@ -46,10 +46,10 @@ public class Persona {
     private String nombre;
 
     @Column(name = "per_genero")
-    private Boolean genero;
+    private String genero;
 
     @Column(name = "per_fecha_nacimiento")
-    private Date fechaNacimiento;
+    private LocalDate fechaNacimiento;
 
     @Column(name = "per_estrato")
     private Integer estrato;
