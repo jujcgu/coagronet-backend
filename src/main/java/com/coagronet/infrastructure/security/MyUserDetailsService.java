@@ -3,8 +3,6 @@ package com.coagronet.infrastructure.security;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-// import org.hibernate.mapping.Set;
-import com.coagronet.usuarioEstado.UsuarioEstado;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -28,9 +26,20 @@ public class MyUserDetailsService implements UserDetailsService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        // Verificar si el usuario no está activo
-        if (!UsuarioEstado.ACTIVE.equals(user.getUsuarioEstado())) {
-            throw new DisabledException("User account is not active.");
+        // Verificar los diferentes estados del usuario
+        switch (user.getUsuarioEstado().getId().intValue()) {
+            case 0: // Usuario desactivado
+                throw new DisabledException("User account is deactivated.");
+            case 1: // Usuario registrado, pero no se ha activado el email
+                throw new DisabledException("User account is pending email verification.");
+            case 2: // Usuario activado, pero no ha llenado información personal y no se ha asociado
+                    // a una empresa
+            case 3: // Usuario activado, ha llenado información personal, pero no se ha asociado a
+                    // una empresa
+            case 4: // Usuario activado y completo
+                break; // Permitir el acceso
+            default:
+                throw new IllegalStateException("Unexpected value: " + user.getUsuarioEstado().getId());
         }
 
         Set<SimpleGrantedAuthority> authorities = user.getRoles().stream()
@@ -48,5 +57,3 @@ public class MyUserDetailsService implements UserDetailsService {
         return userRepository.save(user);
     }
 }
-
-

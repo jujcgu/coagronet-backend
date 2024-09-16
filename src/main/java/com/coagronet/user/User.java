@@ -90,7 +90,8 @@ public class User implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        // Retorna true solo si el estado del usuario es "ACTIVE"
-        return UsuarioEstado.ACTIVE.equals(this.usuarioEstado);
+        // Retorna true si el estado del usuario es "ACTIVADO_SIN_INFO" o cualquier
+        // estado superior
+        return this.usuarioEstado.getId() >= 2;
     }
 }
