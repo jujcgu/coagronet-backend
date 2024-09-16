@@ -37,7 +37,7 @@ public class UserRole implements Serializable {
     private Role role;
 
     @ManyToOne
-    @JoinColumn(name = "usr_empresa_id", referencedColumnName = "emp_id")
+    @JoinColumn(name = "usr_empresa_id", referencedColumnName = "emp_id", nullable = true)
     private Empresa empresa;
 
     // getters and setters
