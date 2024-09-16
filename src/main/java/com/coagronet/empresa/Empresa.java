@@ -24,7 +24,7 @@ public class Empresa {
     @Id
     @GeneratedValue
     @Column(name = "emp_id")
-    private Integer id;
+    private Long id;
 
     @OneToOne
     @JoinColumn(name = "emp_tipo_identificacion_id", referencedColumnName = "tii_id", columnDefinition = "integer default 6")

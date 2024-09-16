@@ -2,12 +2,16 @@ package com.coagronet.empresa.mappers;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.factory.Mappers;
 
 import com.coagronet.empresa.Empresa;
 import com.coagronet.empresa.dtos.EmpresaDTO;
 
 @Mapper(componentModel = "spring")
 public interface EmpresaMapper {
+
+    EmpresaMapper INSTANCE = Mappers.getMapper(EmpresaMapper.class);
+
     @Mapping(source = "tipoIdentificacion.id", target = "tipoIdentificacionId")
     @Mapping(source = "persona.id", target = "personaId")
     EmpresaDTO toEmpresaDTO(Empresa empresa);
@@ -16,4 +20,3 @@ public interface EmpresaMapper {
     @Mapping(source = "personaId", target = "persona.id")
     Empresa toEmpresa(EmpresaDTO empresaDTO);
 }
-

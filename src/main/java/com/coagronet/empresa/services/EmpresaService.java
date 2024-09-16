@@ -1,13 +1,11 @@
 package com.coagronet.empresa.services;
 
-import java.util.List;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.coagronet.empresa.Empresa;
 import com.coagronet.empresa.repositories.EmpresaRepository;
-
-import jakarta.persistence.EntityNotFoundException;
 
 @Service
 public class EmpresaService {
@@ -18,13 +16,14 @@ public class EmpresaService {
         this.empresaRepository = empresaRepository;
     }
 
-    public List<Empresa> findAll() {
-        return empresaRepository.findAll();
+    public Page<Empresa> getAllEmpresas(Pageable pageable) {
+        return empresaRepository.findByEstadoNot(2, pageable);
     }
 
-    public Empresa findById(Integer id) {
-        return empresaRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Empresa no encontrada"));
+    public Empresa getEmpresaById(Long id) {
+        // Asegúrate de que también se filtren por estado aquí si es necesario
+        Empresa empresa = empresaRepository.findById(id).orElse(null);
+        return (empresa != null && empresa.getEstado() != 2) ? empresa : null;
     }
 
     public Empresa save(Empresa empresa) {
@@ -35,7 +34,10 @@ public class EmpresaService {
         return empresaRepository.save(empresa);
     }
 
-    public void deleteById(Integer id) {
-        empresaRepository.deleteById(id);
+    public void deleteEmpresa(Long id) {
+        Empresa empresa = empresaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Persona not found with id: " + id));
+        empresa.setEstado(2);
+        empresaRepository.save(empresa);
     }
 }
