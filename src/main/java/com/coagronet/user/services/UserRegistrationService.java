@@ -29,12 +29,12 @@ public class UserRegistrationService {
 
     // Método para calcular la fecha de expiración del token
     private LocalDateTime calculateExpiryDate() {
-        // Establece la fecha de expiración a 24 horas a partir del momento actual
         return LocalDateTime.now().plus(24, ChronoUnit.HOURS);
     }
 
     public void registerUser(User user) {
-        user.setUsuarioEstado(UsuarioEstado.PENDING_VERIFICATION); // Estado inicial
+        // Estado inicial: Usuario registrado, pero no se ha activado el email
+        user.setUsuarioEstado(UsuarioEstado.PENDIENTE_VERIFICACION);
         userRepository.save(user);
 
         // Generar código de verificación
@@ -50,13 +50,13 @@ public class UserRegistrationService {
                 // Actualizar el token existente
                 verificationToken = existingToken.get();
                 verificationToken.setToken(verificationCode);
-                verificationToken.setExpiryDate(calculateExpiryDate()); // Expiración en 24 horas
+                verificationToken.setExpiryDate(calculateExpiryDate());
             } else {
                 // Crear un nuevo token
                 verificationToken = VerificationToken.builder()
                         .email(user.getUsername())
                         .token(verificationCode)
-                        .expiryDate(calculateExpiryDate()) // Expiración en 24 horas
+                        .expiryDate(calculateExpiryDate())
                         .build();
             }
 
@@ -66,7 +66,6 @@ public class UserRegistrationService {
             // Enviar correo de verificación
             emailVerificationService.sendVerificationEmail(user.getUsername(), verificationCode);
         } catch (Exception e) {
-            // Manejar cualquier excepción que ocurra al intentar guardar el token
             throw new RuntimeException("Error al generar o guardar el token de verificación.", e);
         }
     }
@@ -79,14 +78,18 @@ public class UserRegistrationService {
             Optional<User> userOptional = userRepository.findByUsername(verificationToken.getEmail());
             if (userOptional.isPresent()) {
                 User user = userOptional.get();
-                user.setUsuarioEstado(UsuarioEstado.ACTIVE); // Activa la cuenta
+
+                // Cambiar el estado a 2: Usuario activado, pero no ha llenado información
+                // personal y no se ha asociado a una empresa
+                user.setUsuarioEstado(UsuarioEstado.ACTIVADO_SIN_INFO);
                 userRepository.save(user);
-                return true; // Retorna true si la activación es exitosa
+
+                return true; // Activación exitosa
             } else {
                 throw new RuntimeException("User not found with email: " + verificationToken.getEmail());
             }
         } else {
-            return false; // Retorna false si el token no es válido o ha expirado
+            return false; // Token no válido o ha expirado
         }
     }
 }
