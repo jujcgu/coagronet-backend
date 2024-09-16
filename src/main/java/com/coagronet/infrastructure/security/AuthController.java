@@ -1,6 +1,8 @@
 package com.coagronet.infrastructure.security;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -28,7 +30,9 @@ import com.coagronet.email.services.EmailVerificationService;
 import com.coagronet.role.Role;
 import com.coagronet.role.repositories.RoleRepository;
 import com.coagronet.user.User;
+import com.coagronet.user.repositories.UserRepository;
 import com.coagronet.user.services.UserRegistrationService;
+import com.coagronet.usuarioEstado.UsuarioEstado;
 
 @RestController
 @RequestMapping("/auth")
@@ -55,6 +59,9 @@ public class AuthController {
     @Autowired
     private EmailVerificationService emailVerificationService;
 
+    @Autowired
+    private UserRepository userRepository;
+
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody User user) {
 
@@ -64,10 +71,16 @@ public class AuthController {
 
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
-        Role userRole = roleRepository.findByName(default_role);
+        // Buscar el rol predeterminado y manejar el caso en que no se encuentre
+        Role userRole = roleRepository.findByName(default_role)
+                .orElseThrow(() -> new RuntimeException("Role not found"));
         Set<Role> roles = new HashSet<>();
         roles.add(userRole);
         user.setRoles(roles);
+
+        // Asignar el estado inicial (1: Usuario registrado, pero no se ha activado el
+        // email)
+        user.setUsuarioEstado(UsuarioEstado.ACTIVADO_SIN_INFO);
 
         userRegistrationService.registerUser(user);
 
@@ -87,7 +100,17 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody User user) {
         String token = jwtService.createJwtToken(user.getUsername(), user.getPassword());
-        return ResponseEntity.ok(token);
+
+        // Obtener el usuario por su nombre de usuario para acceder a su estado
+        User foundUser = userRepository.findByUsername(user.getUsername())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        // Crear una respuesta que incluya el token y el estado del usuario
+        Map<String, Object> response = new HashMap<>();
+        response.put("token", token);
+        response.put("usuarioEstado", foundUser.getUsuarioEstado().getId());
+
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/roles")
