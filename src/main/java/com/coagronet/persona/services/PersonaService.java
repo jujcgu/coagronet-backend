@@ -1,8 +1,8 @@
 package com.coagronet.persona.services;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.coagronet.persona.Persona;
@@ -19,9 +19,8 @@ public class PersonaService {
     @Autowired
     private TipoIdentificacionRepository tipoIdentificacionRepository;
 
-    public List<Persona> getAllPersonas() {
-        // Filtra las personas cuyo estado no sea 2
-        return personaRepository.findByEstadoNot(2);
+    public Page<Persona> getAllPersonas(Pageable pageable) {
+        return personaRepository.findByEstadoNot(2, pageable);
     }
 
     public Persona getPersonaById(Long id) {

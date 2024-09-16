@@ -1,9 +1,13 @@
 package com.coagronet.persona.controllers;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -13,6 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.coagronet.persona.Persona;
@@ -29,11 +34,39 @@ public class PersonaController {
     private PersonaService personaService;
 
     @GetMapping
-    public List<PersonaDTO> getAllPersonas() {
-        return personaService.getAllPersonas()
-                .stream()
-                .map(PersonaMapper.INSTANCE::toDto)
-                .collect(Collectors.toList());
+    public ResponseEntity<Map<String, Object>> getAllPersonas(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String field,
+            @RequestParam(defaultValue = "asc") String sort) {
+
+        // Convertir el parámetro sort en Sort.Direction
+        Sort.Direction direction = Sort.Direction.fromString(sort);
+
+        // Crear un objeto Sort con el campo y la dirección
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, field));
+
+        // Obtener la página de personas
+        Page<PersonaDTO> personaPage = personaService.getAllPersonas(pageable)
+                .map(PersonaMapper.INSTANCE::toDto);
+
+        // Construir la respuesta
+        Map<String, Object> response = new HashMap<>();
+        Map<String, Object> header = new HashMap<>();
+        header.put("totalElements", personaPage.getTotalElements());
+        header.put("totalPages", personaPage.getTotalPages());
+        header.put("size", personaPage.getSize());
+        header.put("number", personaPage.getNumber());
+        header.put("sort", personaPage.getSort());
+        header.put("first", personaPage.isFirst());
+        header.put("last", personaPage.isLast());
+        header.put("numberOfElements", personaPage.getNumberOfElements());
+        header.put("empty", personaPage.isEmpty());
+
+        response.put("header", header);
+        response.put("data", personaPage.getContent());
+
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}")
