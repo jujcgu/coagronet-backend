@@ -31,20 +31,30 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**").permitAll()
-                        .requestMatchers("/api/v1/items/**").permitAll()
-                        .requestMatchers("/api/v1/tipo_sede/**").permitAll()
-                        .requestMatchers("/api/v1/empresas/**").permitAll()
-                        .requestMatchers("/api/v1/grupo/**").permitAll()
-                        .requestMatchers("/api/v1/email/**").permitAll()
-                        .requestMatchers("/api/v1/roles/**").permitAll()
-                        .requestMatchers("/api/v1/personas/**").permitAll()
-                        .requestMatchers("/api/v1/productos/**").permitAll()
-                        .requestMatchers("/api/v1/producto-presentaciones/**").permitAll()
+                        .requestMatchers(
+                                "/api/v1/presentaciones/**",
+                                "/auth/**",
+                                "/api/v1/items/**",
+                                "/api/v1/marcas/**",
+                                "/api/v1/sede/**",
+                                "/api/v1/kardex/**",
+                                "/api/v1/kardexItem/**",
+                                "/api/v1/unidades/**",
+                                "/api/v1/estados/**",
+                                "/api/v1/tipo_sede/**",
+                                "/api/v1/empresas/**",
+                                "/api/v1/grupo/**",
+                                "/api/report/**",
+                                "/api/v1/email/**",
+                                "/api/v1/roles/**",
+                                "/api/v1/personas/**",
+                                "/api/v1/productos/**",
+                                "/api/v1/producto-presentaciones/**",
+                                "/api/v1/activaciones/**",
+                                "/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**",
+                                "/api/v1/tipo_identificacion/**")
+                        .permitAll()
                         .requestMatchers("/api/v1/productoCategorias/**").hasRole("ADMINISTRADOR")
-                        .requestMatchers("/api/v1/activaciones**").permitAll()
-                        .requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**").permitAll()
-                        .requestMatchers("/api/v1/tipo_identificacion/**").permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 

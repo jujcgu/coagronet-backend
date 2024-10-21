@@ -1,9 +1,23 @@
 package com.coagronet.grupo.controllers;
 
 import java.net.URI;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
+import com.coagronet.empresa.Empresa;
+import com.coagronet.grupo.dtos.DatosListadoGrupo;
+import com.coagronet.user.User;
+import com.coagronet.user.repositories.UserRepository;
+import com.coagronet.userRole.UserRole;
+import com.coagronet.userRole.repositories.UserRoleRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,10 +32,28 @@ import com.coagronet.grupo.repositories.GrupoRepository;
 @RestController
 @RequestMapping("/api/v1/grupo")
 public class GrupoController {
+
     private final GrupoRepository grupoRepository;
 
     private GrupoController(GrupoRepository grupoRepository) {
         this.grupoRepository = grupoRepository;
+    }
+
+    @Autowired
+    private UserRoleRepository userRoleRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    private Empresa getEmpresaFromUser(User user) {
+        return userRoleRepository.findByUser(user).stream().map(UserRole::getEmpresa).findFirst()
+                .orElseThrow(() -> new RuntimeException("Empresa no encontrada para el usuario"));
+    }
+
+    private User getAuthenticatedUser() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
     }
 
     @GetMapping("/{requestedId}")
@@ -34,6 +66,16 @@ public class GrupoController {
         }
     }
 
+    @GetMapping("/short")
+    public ResponseEntity<List<DatosListadoGrupo>> listadoGrupos() {
+        User authenticatedUser = getAuthenticatedUser();
+        Empresa empresa = getEmpresaFromUser(authenticatedUser);
+        Sort sort = Sort.by(Sort.Direction.ASC, "nombre");
+        List<Grupo> grupos = grupoRepository.findByEstadoNotAndEmpresa(2, empresa, sort);
+        List<DatosListadoGrupo> datosListadoGrupos = grupos.stream().map(DatosListadoGrupo::new).collect(Collectors.toList());
+        return ResponseEntity.ok(datosListadoGrupos);
+    }
+
     @PostMapping
     private ResponseEntity<Void> createGrupo(@RequestBody Grupo newGrupoRequest, UriComponentsBuilder ucb) {
         Grupo savedGrupo = grupoRepository.save(newGrupoRequest);
@@ -43,4 +85,5 @@ public class GrupoController {
                 .toUri();
         return ResponseEntity.created(locationOfNewGrupo).build();
     }
+
 }

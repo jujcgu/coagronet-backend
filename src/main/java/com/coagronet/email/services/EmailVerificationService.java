@@ -22,7 +22,7 @@ public class EmailVerificationService {
     private String verificationUrl; // URL base para la verificación
 
     public EmailVerificationService(VerificationTokenRepository verificationTokenRepository,
-            JavaMailSender mailSender) {
+                                    JavaMailSender mailSender) {
         this.verificationTokenRepository = verificationTokenRepository;
         this.mailSender = mailSender;
     }

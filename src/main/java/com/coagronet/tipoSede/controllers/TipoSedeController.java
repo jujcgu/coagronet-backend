@@ -26,11 +26,11 @@ public class TipoSedeController {
     @Autowired
     private TipoSedeService tipoSedeService;
 
-    @PostMapping("/add")
+    @PostMapping
     public ResponseEntity<Object> addTipoSede(@RequestBody TipoSede tipoSede) {
         try {
             tipoSedeService.addTipoSede(tipoSede);
-            return ResponseHandler.generateResponse(HttpStatus.OK,
+            return ResponseHandler.generateResponse(HttpStatus.CREATED,
                     false,
                     "Tipo de Sede creado exitosamente.",
                     null);
@@ -43,7 +43,7 @@ public class TipoSedeController {
         }
     }
 
-    @GetMapping("/all")
+    @GetMapping
     public List<TipoSede> getAllTipoSedes() {
         return tipoSedeService.getAllTipoSedes();
     }
@@ -53,7 +53,7 @@ public class TipoSedeController {
         return tipoSedeService.getTipoSedeById(id);
     }
 
-    @PutMapping("/update/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<Object> updateTipoSede(@PathVariable Integer id, @RequestBody TipoSede tipoSedeDetails) {
         try {
             TipoSede existingTipoSede = tipoSedeService.getTipoSedeById(id);
@@ -66,7 +66,7 @@ public class TipoSedeController {
             }
             tipoSedeService.updateTipoSede(id, tipoSedeDetails);
             return ResponseHandler.generateResponse(
-                    HttpStatus.OK,
+                    HttpStatus.NO_CONTENT,
                     false,
                     "Tipo de Sede actualizada exitosamente.",
                     null);
@@ -79,7 +79,7 @@ public class TipoSedeController {
         }
     }
 
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Object> deleleTipoSede(@PathVariable Integer id) {
         try {
             TipoSede existingTipoSede = tipoSedeService.getTipoSedeById(id);
@@ -92,7 +92,7 @@ public class TipoSedeController {
             }
             tipoSedeService.deleteTipoSede(id);
             return ResponseHandler.generateResponse(
-                    HttpStatus.OK,
+                    HttpStatus.NO_CONTENT,
                     false,
                     "Tipo de Sede borrada exitosamente.",
                     null);
