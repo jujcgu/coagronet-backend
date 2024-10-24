@@ -1,23 +1,26 @@
 package com.coagronet.almacen.controllers;
 
-import com.coagronet.almacen.Almacen;
-import com.coagronet.almacen.dtos.DatosListadoAlmacen;
-import com.coagronet.almacen.services.AlmacenService;
-import com.coagronet.empresa.Empresa;
-import com.coagronet.produccion.Produccion;
-import com.coagronet.produccion.dtos.DatosListadoProduccion;
-import com.coagronet.user.User;
-import com.coagronet.user.repositories.UserRepository;
-import com.coagronet.userRole.UserRole;
-import com.coagronet.userRole.repositories.UserRoleRepository;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import com.coagronet.almacen.Almacen;
+import com.coagronet.almacen.dtos.DatosListadoAlmacen;
+import com.coagronet.almacen.services.AlmacenService;
+import com.coagronet.empresa.Empresa;
+import com.coagronet.user.User;
+import com.coagronet.user.repositories.UserRepository;
+import com.coagronet.userRole.UserRole;
+import com.coagronet.userRole.repositories.UserRoleRepository;
 
 @RestController
 @RequestMapping("/api/v1/almacenes")
