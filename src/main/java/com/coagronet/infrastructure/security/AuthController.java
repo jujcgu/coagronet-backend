@@ -12,6 +12,7 @@ import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -87,6 +88,20 @@ public class AuthController {
         return ResponseEntity.ok("Verification email sent to " + user.getUsername());
     }
 
+    @PostMapping("/change-password")
+    public ResponseEntity<?> changePassword(@RequestParam String oldPassword, @RequestParam String newPassword) {
+        String username = getUserName();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Contraseña antigua incorrecta");
+        } else {
+            user.setPassword(passwordEncoder.encode(newPassword));
+            userRepository.save(user);
+            return ResponseEntity.ok("Contraseña cambiada exitosamente");
+        }
+    }
+
     @GetMapping("/verify")
     public ResponseEntity<String> verifyUser(@RequestParam String token) {
         boolean isVerified = userRegistrationService.activateUser(token);
@@ -157,6 +172,33 @@ public class AuthController {
             session.invalidate();
         }
         response.setStatus(HttpServletResponse.SC_OK);
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestParam String email) {
+        User user = userRepository.findByUsername(email)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        String token = emailVerificationService.createVerificationToken(user.getUsername());
+        emailVerificationService.sendResetPasswordEmail(user.getUsername(), token);
+
+        return ResponseEntity.ok("Correo de recuperación de contraseña enviado");
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestParam String token, @RequestParam String newPassword) {
+        String username = emailVerificationService.validateVerificationToken(token);
+        if (username == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Enlace de recuperación inválido o expirado");
+        }
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+
+        return ResponseEntity.ok("Contraseña restablecida exitosamente");
     }
 
 }
