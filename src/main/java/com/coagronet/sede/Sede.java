@@ -67,7 +67,7 @@ public class Sede {
     @Column(name = "sed_descripcion", length = 255)
     private String descripcion;
 
-    @Column(name = "tis_estado", columnDefinition = "integer default 1")
+    @Column(name = "sed_estado", columnDefinition = "integer default 1")
     private Integer estado;
 
 }
